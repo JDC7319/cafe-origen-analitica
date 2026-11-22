@@ -31,6 +31,23 @@
     El cliente C01 aparece varias veces, lo que no esta mal en si, significa que tenemos 3 registros asociados al mismo cliente, siendo algo a considerar cuando necesitemos calcular metricas, 
 
 
+## MiniReto 2: Funciones y Ciclo for 
+
+FUNCIÓN totalVendido(ventas)
+
+    INICIAR total EN 0
+
+    PARA CADA venta EN ventas
+        SI cantidad ES MAYOR QUE 0
+            calcular valor de la venta
+            sumar ese valor al total
+        FIN SI
+    FIN PARA
+
+    DEVOLVER total
+
+FIN FUNCIÓN
+
 
 
 ### Pruebas realizadas
