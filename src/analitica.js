@@ -1,12 +1,9 @@
-
 const ventas = require("./datos");
 
 function valorVenta(venta) {
     return venta.cantidad * venta.precio;
 }
 
-
-// Acumulador
 function totalVendido (ventas){
     let total = 0;
 
@@ -19,7 +16,6 @@ function totalVendido (ventas){
     return total;
 }
 
-// Unidades Vendidas
 function unidadesVendidas (ventas) {
     let unidades = 0 ;
 
@@ -34,7 +30,6 @@ function unidadesVendidas (ventas) {
 
 
 
-// La venta de mayor precio
 function ventaMayor (ventas){
     let max = null;
 
@@ -54,39 +49,68 @@ function ventaMayor (ventas){
 
 }
 
-// Ticket Promedio usando un contador
+function ticketPromedio (ventas) {
+    let contador = 0
 
-function ticketPromedio (ventas){
-    let i = 0;
-
-    for (const venta of ventas){
-        if(venta.cantidad > 0){
-            i++;
+    for (const venta of ventas) {
+        if (venta.cantidad > 0) {
+            contador ++;
         }
-        
-        return i;
     }
-    return i;
+    if (contador === 0){
+        return 0;
+    }
 
-    
+    return totalVendido(ventas) / contador
+}
 
-    return totalVendido / i
-
-    
+function normC() {
+    return String().trim().toLowerCase();
 }
 
 
-console.log("El ticket promedio es: ", ticketPromedio(ventas))
+function ventasPorCiudad(ventas, ciudad) {
+    let total = 0;
+
+    const ciudadBuscada = ciudad.trim().toLowerCase();
+
+    for (const venta of ventas) {
+        const ciudadActual = venta.ciudad.trim().toLowerCase();
+
+        if (ciudadActual === ciudadBuscada && venta.cantidad > 0) {
+            total += valorVenta(venta);
+        }
+    }
+
+    return total;
+}
+
+console.log("Medellín:", ventasPorCiudad(ventas, "Medellín"));
+
+console.log("medellín:", ventasPorCiudad(ventas, "medellín"));
+
+console.log("Con espacios:", ventasPorCiudad(ventas, "  MEDELLÍN  "));
+
+console.log("Bogotá:", ventasPorCiudad(ventas, "Bogotá"));
+
+console.log("Ciudad inexistente:", ventasPorCiudad(ventas, "Cartagena"));
+
+console.log("Arreglo vacío:", ventasPorCiudad([], "Medellín"));
 
 
+console.log("Ticket promedio:", ticketPromedio(ventas));
+
+console.log("Ticket de una venta:", ticketPromedio([ventas[0]]));
+
+console.log("Ticket sin ventas:", ticketPromedio([]));
+
+console.log("Ticket con cantidad cero:", ticketPromedio([ventas[7]]));
 
 
-// console.log("El total vendido es: ", totalVendido(ventas));
-// console.log("Unidades Vendidas: ", unidadesVendidas(ventas))
-// console.log("Venta Mayor: ", ventaMayor(ventas))
+console.log("El total vendido es: ", totalVendido(ventas));
+console.log("Unidades Vendidas: ", unidadesVendidas(ventas))
+console.log("Venta Mayor: ", ventaMayor(ventas))
 
-// console.log("Una venta:", ventaMayor([ventas[0]]));
+console.log("Una venta:", ventaMayor([ventas[0]]));
 
-// console.log("Sin ventas:", ventaMayor([]));
-
-
+console.log("Sin ventas:", ventaMayor([]));

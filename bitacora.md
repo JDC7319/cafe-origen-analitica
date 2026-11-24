@@ -120,6 +120,51 @@ FUNCIÓN ticketPromedio(ventas)
 
 FIN FUNCIÓN
 
+Este es el algoritmo para el ticket promedio donde su estructura es similar a los anteriores, vamos a recorrer el arreglo con for, y declaramos un contador que escribimos despues en codigo como ++;
+FUNCIÓN ticketPromedio(ventas)
+
+    INICIAR contador EN 0
+
+    PARA CADA venta EN ventas
+        SI cantidad ES MAYOR QUE 0
+            INCREMENTAR contador EN 1
+        FIN SI
+    FIN PARA
+
+    SI contador ES IGUAL A 0
+        DEVOLVER 0
+    FIN SI
+
+    DEVOLVER totalVendido(ventas) / contador
+
+FIN FUNCIÓN
+
+
+Esta funcion
+
+FUNCIÓN ventasPorCiudad(ventas, ciudad)
+
+    INICIAR total EN 0
+
+    NORMALIZAR ciudad buscada
+
+    PARA CADA venta EN ventas
+
+        NORMALIZAR ciudad de la venta
+
+        SI las ciudades coinciden Y cantidad > 0
+
+            SUMAR valorVenta(venta) AL total
+
+        FIN SI
+
+    FIN PARA
+
+    DEVOLVER total
+
+FIN FUNCIÓN
+
+
 
 ### Pruebas realizadas
 
