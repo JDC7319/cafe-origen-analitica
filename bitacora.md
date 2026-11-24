@@ -33,6 +33,8 @@
 
 ## MiniReto 2: Funciones y Ciclo for 
 
+En este pseudo codigo creamos una funcion total Vendido donde vamos a usar un ciclo for, primero declaramos nuestra variable acumuladora, la inicializamos en 0, for venta of ventas, recorremos cada venta en el array ventas, plural arrays, objetos singular, y como condicion la cantidad tiene que ser mayor que cero para poder realizar la operacion, multiplicamos para saber el valor y lugo lo sumamos al acumulador del total.
+
 FUNCIÓN totalVendido(ventas)
 
     INICIAR total EN 0
@@ -48,6 +50,75 @@ FUNCIÓN totalVendido(ventas)
 
 FIN FUNCIÓN
 
+Resultado 
+
+El total vendido es:  985000
+
+Ahora este codigo nos deberia arrojar las unidades vendidas, aca no necesitamos multiplioar si no solo revisar cuantas unidades se vendieron, misma logica que el anterior
+
+FUNCIÓN unidadesVendidas(ventas)
+
+    INICIAR unidades EN 0
+
+    PARA CADA venta EN ventas
+        SI cantidad ES MAYOR QUE 0
+            SUMAR cantidad A unidades
+        FIN SI
+    FIN PARA
+
+    DEVOLVER unidades
+
+FIN FUNCIÓN
+
+
+Venta Mayor
+
+Aqui revisamos la venta de mayor valor en nuestro array, inicializamos en null en caso tengamos un arreglo vacio entonces el mayor valor sera null, usamos un ciclo for venta of ventas, usamos un condicional if comparando si nuestro max es mayor que 0 y dentro otro if en caso sea null guardarlo como la mayor, si no, lo actualizamos. AL usarse mayor y no mayor que, solo reemplazamos la variable al encontrar una de mayor valor.
+
+FUNCIÓN ventaMayor(ventas)
+
+    INICIAR mayor EN null
+
+    PARA CADA venta EN ventas
+
+        SI cantidad ES MAYOR QUE 0
+
+            SI mayor ES null
+                GUARDAR venta COMO mayor
+
+            SI NO, SI valorVenta(venta) > valorVenta(mayor)
+                ACTUALIZAR mayor CON venta
+
+            FIN SI
+
+        FIN SI
+
+    FIN PARA
+
+    DEVOLVER mayor
+
+FIN FUNCIÓN
+
+
+Contador 
+
+FUNCIÓN ticketPromedio(ventas)
+
+    INICIAR contador EN 0
+
+    PARA CADA venta EN ventas
+        SI cantidad ES MAYOR QUE 0
+            INCREMENTAR contador EN 1
+        FIN SI
+    FIN PARA
+
+    SI contador ES IGUAL A 0
+        DEVOLVER 0
+    FIN SI
+
+    DEVOLVER totalVendido(ventas) / contador
+
+FIN FUNCIÓN
 
 
 ### Pruebas realizadas
