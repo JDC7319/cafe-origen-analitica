@@ -85,32 +85,115 @@ function ventasPorCiudad(ventas, ciudad) {
     return total;
 }
 
-console.log("Medellín:", ventasPorCiudad(ventas, "Medellín"));
+function totalVendidoM(ventas) {
+    return ventas
+        .filter(venta => venta.cantidad > 0)
+        .map(venta => valorVenta(venta))
+        .reduce((acumulador, valor) => {
+            return acumulador + valor;
+        }, 0);
+}
 
-console.log("medellín:", ventasPorCiudad(ventas, "medellín"));
-
-console.log("Con espacios:", ventasPorCiudad(ventas, "  MEDELLÍN  "));
-
-console.log("Bogotá:", ventasPorCiudad(ventas, "Bogotá"));
-
-console.log("Ciudad inexistente:", ventasPorCiudad(ventas, "Cartagena"));
-
-console.log("Arreglo vacío:", ventasPorCiudad([], "Medellín"));
-
-
-console.log("Ticket promedio:", ticketPromedio(ventas));
-
-console.log("Ticket de una venta:", ticketPromedio([ventas[0]]));
-
-console.log("Ticket sin ventas:", ticketPromedio([]));
-
-console.log("Ticket con cantidad cero:", ticketPromedio([ventas[7]]));
+function unidadesVendidasM(ventas) {
+    return ventas
+        .filter(venta => venta.cantidad > 0  )
+        .map(venta =>  venta.cantidad)
+        .reduce((acc, cantidad) =>  acc + cantidad, 0);
+}
 
 
-console.log("El total vendido es: ", totalVendido(ventas));
-console.log("Unidades Vendidas: ", unidadesVendidas(ventas))
-console.log("Venta Mayor: ", ventaMayor(ventas))
+function ventasPorCiudadM(ventas, ciudad) {
+    const ciudadBuscada = ciudad.trim().toLowerCase();
 
-console.log("Una venta:", ventaMayor([ventas[0]]));
+    return ventas
+        .filter(venta => {
+            const ciudadActual = venta.ciudad.trim().toLowerCase();;
 
-console.log("Sin ventas:", ventaMayor([]));
+            return ciudadActual===ciudadBuscada&&venta.cantidad > 0;
+        })
+        .map(venta => valorVenta(venta))
+        .reduce((acc, valor) => acc + valor, 0);
+}
+
+
+function totalPorCiudad(ventas) {
+    return ventas.reduce((acumulador, venta) => {
+        if (venta.cantidad > 0) {
+            const ciudad = venta.ciudad.trim().toLowerCase();
+
+            if (acumulador[ciudad] === undefined) {
+                acumulador[ciudad] = 0;
+            }
+
+            acumulador[ciudad] += valorVenta(venta);
+        }
+
+        return acumulador;
+    }, {});
+}
+function unidadesPorProducto (ventas){
+    
+}
+// console.log(totalPorCiudad(ventas));
+// console.log(totalPorCiudad([]));
+
+// console.log(
+//     "Medellín con ciclo:",
+//     ventasPorCiudad(ventas, "Medellín")
+// );
+
+// console.log(
+//     "Medellín con métodos:",
+//     ventasPorCiudadM(ventas, "Medellín")
+// );
+
+// console.log(
+//     "¿Son iguales?",
+//     ventasPorCiudad(ventas, "Medellín") ===
+//     ventasPorCiudadM(ventas, "Medellín")
+// );
+
+// console.log("Con ciclo:", unidadesVendidas(ventas));
+// console.log("Con métodos:", unidadesVendidasM(ventas));
+
+// console.log(
+//     "¿Son iguales?",
+//     unidadesVendidas(ventas) === unidadesVendidasM(ventas)
+// );
+
+// console.log("Con ciclo:", totalVendido(ventas));
+// console.log("Con métodos:", totalVendidoM(ventas));
+// console.log(
+//     "¿Son iguales?",
+//     totalVendido(ventas) === totalVendidoM(ventas)
+// );
+
+
+
+// for (const [nombre, datos] of pruebas) {
+//     console.log(`\n${nombre}`);
+
+//     console.log("Total:", totalVendido(datos));
+//     console.log("Unidades:", unidadesVendidas(datos));
+//     console.log("Mayor:", ventaMayor(datos));
+//     console.log("Ticket:", ticketPromedio(datos));
+//     console.log("Medellín:", ventasPorCiudad(datos, "Medellín"));
+// }
+
+
+module.exports = {
+    valorVenta,
+    totalVendido,
+    unidadesVendidas,
+    ventaMayor,
+    ticketPromedio,
+    ventasPorCiudad,
+    totalVendidoM,
+    unidadesVendidasM,
+    ventasPorCiudadM,
+    totalPorCiudad
+};
+
+
+
+
