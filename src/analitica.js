@@ -132,8 +132,45 @@ function totalPorCiudad(ventas) {
     }, {});
 }
 function unidadesPorProducto (ventas){
-    
+    return ventas.reduce((acumulador,venta) => {
+        if (venta.cantidad>0){
+            acumulador += venta.cantidad
+            producto += venta.producto
+        }
+
+
+        return acumulador, producto;
+    }, {})
 }
+
+
+console.log(unidadesPorProducto(ventas));
+
+console.log(unidadesPorProducto([]));
+
+
+
+// function totalVendidoInstrumentada(ventas,contador) {
+//     let total = 0,
+//     for (const v of ventas) {
+//         contador.ops++;
+//         total += valorVenta(v)
+//     }
+//     return total;
+// }
+
+// function ventaMayorInstrumentada(ventas,contador) {
+//     if(ventas.length===0){
+
+//     }
+//     let total = 0,
+//     for (const v of ventas) {
+//         contador.ops++;
+//         total += valorVenta(v)
+//     }
+//     return total;
+// }
+
 // console.log(totalPorCiudad(ventas));
 // console.log(totalPorCiudad([]));
 
@@ -191,7 +228,9 @@ module.exports = {
     totalVendidoM,
     unidadesVendidasM,
     ventasPorCiudadM,
-    totalPorCiudad
+    totalPorCiudad,
+    totalVendidoInstrumentada,
+    ventaMayorInstrumentada,
 };
 
 
