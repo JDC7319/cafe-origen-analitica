@@ -35,3 +35,27 @@
 //     }
 //     return ventas;
 // }
+
+
+
+
+// function totalVendidInstrumentada(ventas,contador) {
+//     let total = 0,
+//     for (const v of ventas) {
+//         contador.ops++;
+//         total += valorVenta(v)
+//     }
+//     return total;
+// }
+
+// function ventaMayorInstrumentada(ventas,contador) {
+//     if(ventas.length===0){
+
+//     }
+//     let total = 0,
+//     for (const v of ventas) {
+//         contador.ops++;
+//         total += valorVenta(v)
+//     }
+//     return total;
+// }
