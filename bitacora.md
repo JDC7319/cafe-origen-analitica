@@ -370,14 +370,92 @@ Se ejecutó `node src/verificar.js` para comprobar la equivalencia entre algorit
 
 ---
 
-## MiniReto 4 — Reporte de negocio v0.1 (pendiente)
+## MiniReto 4 — Integración del reporte y depuración
 
-Este reto todavía no se ha desarrollado ni probado en la conversación. Al completarlo, registrar aquí:
+### Objetivo
 
-- Ejecución de `node src/reporte.js` y sus cuatro secciones: resumen general, ventas por ciudad, unidades por producto y top 3 por valor.
-- Formato de importes COP mediante `toLocaleString("es-CO")`.
-- `ventasDelDia(ventas, fecha)` y resultados de un día con ventas y otro sin ventas.
-- Depuración del posible grupo duplicado `Bogotá` / `Bogotá ` usando: **síntoma, entrada, hipótesis, prueba, causa, corrección**.
-- Depuración del posible `NaN` en un día sin ventas, con los mismos seis campos.
-- Verificación de que el reporte no presenta `NaN`, `undefined` ni grupos duplicados.
-- Actualización de `README.md` y commit/push de la versión v0.1.
+Integrar las funciones del motor de analítica en un reporte ejecutable desde Node.js, comprobar sus resultados y verificar el manejo de casos borde.
+
+### 1. Integración del reporte
+
+Se creó `src/reporte.js`, que importa los datos desde `datos.js` y las funciones desde `analitica.js`.
+
+El reporte contiene:
+
+- Resumen general de ventas.
+- Totales vendidos por ciudad.
+- Unidades vendidas por producto.
+- Ranking de los tres productos con mayores ingresos.
+- Resumen de un día con ventas y otro sin ventas.
+
+Se utilizó `toLocaleString("es-CO")` para presentar los valores en pesos colombianos con dos decimales.
+
+### 2. Depuración — Error de ciudades duplicadas
+
+**Síntoma:** la gerente reportó que Bogotá aparecía dos veces en el reporte.
+
+**Entrada que produce el problema:** dos registros con las ciudades `"Bogotá"` y `"Bogotá "`.
+
+**Hipótesis:** JavaScript considera distintos los strings que contienen espacios adicionales, lo que ocasiona agrupaciones separadas.
+
+**Prueba realizada:** se creó un arreglo con dos registros para Bogotá, uno con un espacio al final. Se ejecutó `totalPorCiudad()`.
+
+**Resultado obtenido:**
+
+```javascript
+{ 'bogotá': 30000 }
+```
+
+**Causa:** la ausencia de normalización puede provocar que diferentes representaciones de una misma ciudad se utilicen como claves independientes.
+
+**Corrección:** la función utiliza `trim()` para eliminar espacios sobrantes y `toLowerCase()` para unificar mayúsculas y minúsculas.
+
+**Conclusión:** la implementación actual agrupa correctamente ambas variantes en una sola ciudad.
+
+### 3. Depuración — Error NaN en ticket promedio
+
+**Síntoma:** al seleccionar un día sin ventas, el ticket promedio podía mostrar `NaN`.
+
+**Entrada que produce el problema:** un arreglo vacío `[]`, obtenido al consultar una fecha sin registros.
+
+**Hipótesis:** el algoritmo intenta dividir el total vendido entre cero ventas válidas.
+
+**Prueba realizada:** se ejecutó el reporte para el 10 de septiembre de 2026, una fecha sin ventas registradas.
+
+**Resultado obtenido:**
+
+```text
+Registros: 0
+Total vendido: $0,00
+Unidades vendidas: 0
+Ticket promedio: $0,00
+```
+
+**Causa:** dividir `0 / 0` en JavaScript devuelve `NaN`.
+
+**Corrección:** en `ticketPromedio()` se comprueba si el contador de ventas válidas es cero y, en ese caso, se devuelve `0` antes de realizar la división.
+
+**Conclusión:** la implementación actual evita `NaN` cuando se consultan días sin ventas.
+
+### 4. Resultados finales
+
+| Indicador | Resultado |
+|---|---:|
+| Total vendido | $985.000 |
+| Unidades vendidas | 21 |
+| Ticket promedio | $89.545,45 |
+| Venta de mayor valor | ID 10 |
+| Valor de venta mayor | $168.000 |
+| Ciudades agrupadas | 4 |
+| Productos diferentes | 5 |
+
+Se verificó que el reporte mostrado no contiene valores `NaN`, `undefined` ni ciudades duplicadas.
+
+### 5. Decisiones técnicas
+
+- Mantener los datos originales sin modificar.
+- Separar la información, las funciones analíticas y la presentación en archivos independientes.
+- Reutilizar funciones para evitar repetir operaciones.
+- Utilizar normalización de strings al agrupar ciudades.
+- Devolver cero cuando no existen ventas válidas para calcular el ticket promedio.
+- Formatear los valores monetarios únicamente en la capa de presentación.
