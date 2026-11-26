@@ -1,272 +1,383 @@
-# Bitácora - Café Origen
+# Bitácora — Café Origen Analítica
 
-## MiniReto 1: Modelado y exploración de datos
+**Proyecto:** `cafe-origen-analitica`  
+**Objetivo:** desarrollar, probar y documentar un motor de análisis de ventas con JavaScript y Node.js.  
+**Criterio de validez:** una venta es efectiva cuando `cantidad > 0`. La muestra original se conserva sin modificar.
+
+---
+
+## MiniReto 1 — Modelado y exploración
 
 ### Plan de trabajo
 
+1. Crear el repositorio y los archivos `src/datos.js`, `src/analitica.js`, `src/explorar.js`, `README.md` y `bitacora.md`.
+2. Representar los 12 registros como un arreglo de objetos, respetando los valores originales.
+3. Exportar el arreglo desde `datos.js` con `module.exports` e importarlo en `explorar.js` con `require()`.
+4. Explorar `length`, el primer y último registro, la propiedad `producto` del índice 4 y los datos completos con `console.table()`.
+5. Registrar el diccionario y las decisiones sobre casos borde.
+
 ### Diccionario de datos
 
-| Propiedad | Tipo de dato | Significado |
-|---    |---    |---           |
-| `id` | `number` | Identificador único del registro de venta |
-| `fecha` | `string` | Fecha en que se realizó la venta |
-| `cliente` | `string` | Código que identifica al cliente |
-| `producto` | `string` | Nombre del producto vendido |
-| `ciudad` | `string` | Ciudad asociada con la venta |
-| `cantidad` | `number` | Número de unidades registradas |
-| `precio` | `number` | Precio por unidad en pesos colombianos |
+| Propiedad | Tipo JavaScript | Significado |
+|---|---|---|
+| `id` | `number` | Identificador del registro de venta. |
+| `fecha` | `string` | Fecha de la venta en formato `AAAA-MM-DD`. |
+| `cliente` | `string` | Identificador del cliente, por ejemplo `C01`. |
+| `producto` | `string` | Nombre y presentación del artículo. |
+| `ciudad` | `string` | Ciudad asociada a la venta. |
+| `cantidad` | `number` | Unidades registradas en esa venta. |
+| `precio` | `number` | Precio **unitario** en pesos colombianos (COP). |
 
-### Casos borde detectados
-    Ciudades con minuscula y mayuscula
-    con la propiedad ciudad y la diferencia entre los datos:
-     medellin===Medellin // false
+### Casos borde detectados y decisiones
 
-    Esto generaria un reporte incorrecto entendiendo medellin y Medellin como ciudades distintas
+| Caso | Observación | Riesgo | Decisión |
+|---|---|---|---|
+| Ciudades inconsistentes | Existen `"Medellín"` y `"medellín"`; también podrían llegar cadenas con espacios sobrantes. | Contar una misma ciudad como dos grupos distintos. | Conservar `datos.js` intacto y comparar o agrupar con `trim().toLowerCase()`. |
+| Cantidad cero | El registro ID 8 tiene `cantidad: 0`. | Contarlo como venta efectiva distorsiona indicadores como el ticket promedio. | Conservarlo en el historial y excluirlo de indicadores de ventas efectivas (`cantidad > 0`). |
+| Clientes repetidos | `C01` aparece en los registros ID 1, 4 y 11. | Confundir el número de registros con el de clientes únicos. | Permitir múltiples compras por cliente; cuando se pidan clientes únicos, contar identificadores distintos. |
 
-    Ventas con cantidad 0
+**Nota:** un cliente repetido no constituye por sí solo un error. Es un caso a considerar al diseñar métricas.
 
-    Esto nos pondria a preguntarnos si debemos considerar este registro como una venta valida, podria representar una operacion cancelada, error de registro o movimiento sin nada vendido.
+### Pruebas de exploración
 
-    Clientes repetidos
-    El cliente C01 aparece varias veces, lo que no esta mal en si, significa que tenemos 3 registros asociados al mismo cliente, siendo algo a considerar cuando necesitemos calcular metricas, 
+- `ventas.length`: **12**.
+- `ventas[0]`: primer registro, ID **1**.
+- `ventas[ventas.length - 1]`: último registro, ID **12**.
+- `ventas[4].producto`: **`Origen Sierra 500 g`** (se interpreta posición 4 como índice 4 de JavaScript).
+- `console.table(ventas)`: muestra la tabla con los 12 registros.
+- Comando de ejecución: `node src/explorar.js`.
 
+---
 
-## MiniReto 2: Funciones y Ciclo For / Indicadores básicos de negocio
+## MiniReto 2 — Indicadores básicos con ciclos
 
-Primero veremos el pseudo codigo de los algoritmos que despues trabajamos en analitica.js.
+### Reglas de negocio y patrones
 
-En este pseudo codigo creamos una funcion total Vendido donde vamos a usar un ciclo for, primero declaramos nuestra variable acumuladora, la inicializamos en 0, for venta of ventas, recorremos cada venta en el array ventas, plural arrays, objetos singular, y como condicion la cantidad tiene que ser mayor que cero para poder realizar la operacion, multiplicamos para saber el valor y lugo lo sumamos al acumulador del total.
+- **Acumulador:** empieza en `0` y suma un importe o cantidad en cada iteración válida.
+- **Contador:** empieza en `0` y aumenta en `1` por cada registro que cumple una condición.
+- **Máximo:** empieza en `null` y conserva el registro válido de mayor valor encontrado.
+- Las funciones reciben argumentos y devuelven resultados; no dependen del arreglo importado globalmente.
+- En este reto se usan `for...of` y condicionales; no `map`, `filter` ni `reduce`.
 
+### Planes en pseudocódigo
+
+**1. `valorVenta(venta)` — valor de un registro**
+
+```text
+FUNCIÓN valorVenta(venta)
+    DEVOLVER venta.cantidad * venta.precio
+FIN FUNCIÓN
+```
+
+**2. `totalVendido(ventas)` — acumulador monetario**
+
+```text
 FUNCIÓN totalVendido(ventas)
-
-    INICIAR total EN 0
-
+    total = 0
     PARA CADA venta EN ventas
-        SI cantidad ES MAYOR QUE 0
-            calcular valor de la venta
-            sumar ese valor al total
+        SI venta.cantidad > 0
+            total = total + valorVenta(venta)
         FIN SI
     FIN PARA
-
     DEVOLVER total
-
 FIN FUNCIÓN
-
-Resultado 
-
+```
 
 
-Ahora este codigo nos deberia arrojar las unidades vendidas, aca no necesitamos multiplioar si no solo revisar cuantas unidades se vendieron, misma logica que el anterior
-
+**3. `unidadesVendidas(ventas)` — acumulador de unidades**
+```text
 FUNCIÓN unidadesVendidas(ventas)
-
-    INICIAR unidades EN 0
-
+    unidades = 0
     PARA CADA venta EN ventas
-        SI cantidad ES MAYOR QUE 0
-            SUMAR cantidad A unidades
+        SI venta.cantidad > 0
+            unidades = unidades + venta.cantidad
         FIN SI
     FIN PARA
-
     DEVOLVER unidades
-
 FIN FUNCIÓN
+```
 
+**4. `ventaMayor(ventas)` — patrón máximo**
 
-Venta Mayor
-
-Aqui revisamos la venta de mayor valor en nuestro array, inicializamos en null en caso tengamos un arreglo vacio entonces el mayor valor sera null, usamos un ciclo for venta of ventas, usamos un condicional if comparando si nuestro max es mayor que 0 y dentro otro if en caso sea null guardarlo como la mayor, si no, lo actualizamos. AL usarse mayor y no mayor que, solo reemplazamos la variable al encontrar una de mayor valor.
-
+```text
 FUNCIÓN ventaMayor(ventas)
-
-    INICIAR mayor EN null
-
+    max = null
     PARA CADA venta EN ventas
-
-        SI cantidad ES MAYOR QUE 0
-
-            SI mayor ES null
-                GUARDAR venta COMO mayor
-
-            SI NO, SI valorVenta(venta) > valorVenta(mayor)
-                ACTUALIZAR mayor CON venta
-
+        SI venta.cantidad > 0
+            SI max ES null
+                max = venta
+            SI NO, SI valorVenta(venta) > valorVenta(max)
+                max = venta
             FIN SI
-
         FIN SI
-
     FIN PARA
-
-    DEVOLVER mayor
-
+    DEVOLVER max
 FIN FUNCIÓN
+```
 
-Aca vamos a utilizar un contador usando el ++, con un condicional para el ciclo venta of ventas y otro para el contador, luego devolvemos el promedio usando la funcion total vendido, totalVendido es el calculo de ventas.cantidad*ventas.producto, luego dividiendose por el contador para calcular el promedio
+**5. `ticketPromedio(ventas)` — contador y acumulador**
 
+```text
 FUNCIÓN ticketPromedio(ventas)
-
-    INICIAR contador EN 0
-
+    contador = 0
     PARA CADA venta EN ventas
-        SI cantidad ES MAYOR QUE 0
-            INCREMENTAR contador EN 1
+        SI venta.cantidad > 0
+            contador = contador + 1
         FIN SI
     FIN PARA
-
-    SI contador ES IGUAL A 0
+    SI contador ES 0
         DEVOLVER 0
     FIN SI
-
     DEVOLVER totalVendido(ventas) / contador
-
 FIN FUNCIÓN
+```
 
+**6. `ventasPorCiudad(ventas, ciudad)` — filtro manual y acumulador**
 
-
-Con esta funcion podemos revisar las ventas por ciudad, usando esos dos como parametros, normalizar seria una funcion que usaria el trim y el toLowerCase esto ayuda a evitar tener una misma ciudad como una distinta
-
+```text
 FUNCIÓN ventasPorCiudad(ventas, ciudad)
-
-    INICIAR total EN 0
-
-    NORMALIZAR ciudad buscada
-
+    total = 0
+    ciudadBuscada = trim(toLowerCase(ciudad))
     PARA CADA venta EN ventas
-
-        NORMALIZAR ciudad de la venta
-
-        SI las ciudades coinciden Y cantidad > 0
-
-            SUMAR valorVenta(venta) AL total
-
+        ciudadActual = trim(toLowerCase(venta.ciudad))
+        SI ciudadActual ES ciudadBuscada Y venta.cantidad > 0
+            total = total + valorVenta(venta)
         FIN SI
-
     FIN PARA
-
     DEVOLVER total
-
 FIN FUNCIÓN
+```
 
+### Trazas manuales
 
+**Traza A — `totalVendido(ventas)`**
 
+| ID | Valor de venta (COP) | Total acumulado (COP) |
+|---:|---:|---:|
+| 1 | 84.000 | 84.000 |
+| 2 | 26.000 | 110.000 |
+| 3 | 95.000 | 205.000 |
+| 4 | 42.000 | 247.000 |
+| 5 | 135.000 | 382.000 |
+| 6 | 52.000 | 434.000 |
+| 7 | 120.000 | 554.000 |
+| 8 | 0 | 554.000 |
+| 9 | 90.000 | 644.000 |
+| 10 | 168.000 | 812.000 |
+| 11 | 95.000 | 907.000 |
+| 12 | 78.000 | **985.000** |
 
+**Traza B — `ventaMayor(ventas)`**
 
-### 1. Plan de algoritmos
+| ID | Valor actual (COP) | ID del máximo tras comparar |
+|---:|---:|---:|
+| 1 | 84.000 | 1 |
+| 2 | 26.000 | 1 |
+| 3 | 95.000 | 3 |
+| 4 | 42.000 | 3 |
+| 5 | 135.000 | 5 |
+| 6 | 52.000 | 5 |
+| 7 | 120.000 | 5 |
+| 8 | 0 (no válida) | 5 |
+| 9 | 90.000 | 5 |
+| 10 | 168.000 | **10** |
+| 11 | 95.000 | 10 |
+| 12 | 78.000 | 10 |
 
-**valorVenta(venta)**
+Resultado de la traza: se devuelve **el registro completo ID 10**, no solamente `168000`.
 
-- Recibe un objeto que representa una venta.
-- Multiplica la cantidad por el precio unitario.
-- Devuelve el resultado.
+### Resultados observados
 
-**totalVendido(ventas)**
+| Indicador / caso | Resultado |
+|---|---|
+| `totalVendido(ventas)` | `985000` |
+| `unidadesVendidas(ventas)` | `21` |
+| `ventaMayor(ventas)` | Registro ID `10` |
+| `ticketPromedio(ventas)` | `89545.45454545454` |
+| `ventasPorCiudad(ventas, "Medellín")` | `356000` |
+| `ventasPorCiudad(ventas, "Bogotá")` | `276000` |
+| `ventasPorCiudad(ventas, "  MEDELLÍN  ")` | `356000` |
+| `ventasPorCiudad(ventas, "Cartagena")` | `0` |
+| `ventaMayor([ventas[0]])` | Registro ID `1` |
+| `ventaMayor([])` | `null` |
+| `ticketPromedio([ventas[0]])` | `84000` |
+| `ticketPromedio([])` | `0` |
+| `ticketPromedio([ventas[7]])` | `0` |
+| `ventasPorCiudad([], "Medellín")` | `0` |
 
-- Iniciar un acumulador en 0.
-- Recorrer el arreglo de ventas.
-- Verificar que la cantidad sea mayor que 0.
-- Sumar el valor de cada venta válida.
-- Devolver el acumulador.
+### Decisiones sobre casos borde
 
-**unidadesVendidas(ventas)**
+- Sin ventas válidas, los totales y el ticket promedio devuelven `0` para evitar divisiones entre cero y `NaN`.
+- `ventaMayor([])` devuelve `null` porque no existe un registro máximo.
+- Los registros con `cantidad <= 0` no se consideran efectivos con los datos y reglas de este proyecto.
+- Si hay empate en el valor máximo, `ventaMayor` conserva la primera venta encontrada (`>` en lugar de `>=`).
+- Las ciudades se normalizan solo para la comparación, no para alterar los registros originales.
 
-- Iniciar un acumulador en 0.
-- Recorrer las ventas.
-- Verificar que la cantidad sea mayor que 0.
-- Sumar las unidades vendidas.
-- Devolver el total de unidades.
+**Prueba de cobertura pendiente por confirmar:** registrar también los resultados de `totalVendido([])`, `unidadesVendidas([])`, `totalVendido([ventas[0]])` y `unidadesVendidas([ventas[0]])` si todavía no se ejecutaron individualmente.
 
-**ventaMayor(ventas)**
+---
 
-- Inicializar la variable `max` en `null`.
-- Recorrer las ventas.
-- Ignorar registros con cantidad igual a 0.
-- Guardar la primera venta válida.
-- Comparar cada venta posterior con la mayor encontrada.
-- Actualizar `max` cuando se encuentre una venta de mayor valor.
-- Devolver el objeto completo o `null` si no hay ventas válidas.
+## MiniReto 3 — Métodos de arreglo, agrupaciones y rankings
 
-**ticketPromedio(ventas)**
+### Objetivo y decisión de diseño
 
-- Inicializar un contador en 0.
-- Recorrer las ventas.
-- Incrementar el contador por cada venta con cantidad mayor que 0.
-- Si el contador es 0, devolver 0 para evitar una división entre cero.
-- Dividir el total vendido entre la cantidad de ventas válidas.
-- Devolver el promedio.
+Reescribir los cálculos de ciclo con `filter`, `map` y `reduce` sin cambiar sus resultados; después, agrupar por ciudad y producto, y producir un ranking monetario. Se conservan las funciones anteriores para poder comparar ambas versiones.
 
-**ventasPorCiudad(ventas, ciudad)**
+`filter()` selecciona; `map()` transforma; `reduce()` acumula. Para agrupar, el acumulador de `reduce()` es un objeto `{}`; para sumar es un número `0`.
 
-- Inicializar un acumulador en 0.
-- Normalizar la ciudad solicitada con `trim()` y `toLowerCase()`.
-- Recorrer las ventas.
-- Normalizar la ciudad de cada registro.
-- Comprobar que las ciudades coincidan y que la cantidad sea mayor que 0.
-- Acumular el valor de las ventas que cumplan ambas condiciones.
-- Devolver el total.
+### Las cinco preguntas sobre colecciones
 
-### 2. Trazas manuales
+| Función | ¿Qué recorro? | ¿Qué filtro? | ¿Qué transformo? | ¿Qué acumulo? | ¿Cómo agrupo? |
+|---|---|---|---|---|---|
+| `totalVendidoM` | Registros de `ventas` | `cantidad > 0` | Cada venta en `valorVenta(venta)` | Ingresos en número inicial `0` | No agrupa: produce un total |
+| `unidadesVendidasM` | Registros de `ventas` | `cantidad > 0` | Cada venta en `venta.cantidad` | Unidades desde `0` | No agrupa: produce un total |
+| `ventasPorCiudadM` | Registros de `ventas` | Ciudad normalizada coincidente y `cantidad > 0` | Cada venta válida en su valor monetario | Ingresos de la ciudad desde `0` | No agrupa todas las ciudades: selecciona una |
+| `totalPorCiudad` | Registros de `ventas` | `cantidad > 0` | `ciudad.trim().toLowerCase()` y valor monetario | Dinero en un objeto `{}` | Clave = ciudad normalizada |
+| `unidadesPorProducto` | Registros de `ventas` | `cantidad > 0` | Extrae el nombre del producto | `venta.cantidad` en `{}` | Clave = nombre del producto |
+| `valorPorProducto` | Registros de `ventas` | `cantidad > 0` | Producto y `valorVenta(venta)` | Ingresos por producto en `{}` | Clave = nombre del producto |
+| `topProductosPorValor` | Totales del diccionario de productos | No filtra registros adicionales; `slice(0, k)` limita el resultado | `Object.entries()` y `map()` convierten pares en `{producto, valor}` | Reutiliza los totales previamente acumulados | Reutiliza `valorPorProducto`; ordena con `sort((a,b) => b.valor - a.valor)` |
 
-#### Traza 1: totalVendido()
+### Pseudocódigo de agrupaciones y ranking
 
-| ID | Valor de venta | Acumulado |
+**`totalPorCiudad(ventas)`**
+
+```text
+CREAR objeto vacío totales
+PARA CADA venta válida
+    ciudad = normalizar(venta.ciudad)
+    SI ciudad no existe en totales: totales[ciudad] = 0
+    totales[ciudad] = totales[ciudad] + valorVenta(venta)
+FIN PARA
+DEVOLVER totales
+```
+
+**`unidadesPorProducto(ventas)`**
+
+```text
+CREAR objeto vacío unidades
+PARA CADA venta válida
+    producto = venta.producto
+    SI producto no existe: unidades[producto] = 0
+    unidades[producto] = unidades[producto] + venta.cantidad
+FIN PARA
+DEVOLVER unidades
+```
+
+**`valorPorProducto(ventas)`**
+
+```text
+CREAR objeto vacío ingresos
+PARA CADA venta válida
+    producto = venta.producto
+    SI producto no existe: ingresos[producto] = 0
+    ingresos[producto] = ingresos[producto] + valorVenta(venta)
+FIN PARA
+DEVOLVER ingresos
+```
+
+**`topProductosPorValor(ventas, k)`**
+
+```text
+OBTENER los ingresos agrupados con valorPorProducto(ventas)
+CONVERTIR el objeto en pares mediante Object.entries
+TRANSFORMAR cada par en un objeto {producto, valor}
+ORDENAR por valor de mayor a menor
+TOMAR los primeros k elementos con slice(0, k)
+DEVOLVER el arreglo resultante
+```
+
+### Resultados de agrupación y ranking
+
+**Ingresos por ciudad:**
+
+| Ciudad normalizada | Ingresos (COP) |
+|---|---:|
+| `medellín` | 356.000 |
+| `bogotá` | 276.000 |
+| `cali` | 185.000 |
+| `pereira` | 168.000 |
+| **Total** | **985.000** |
+
+**Unidades e ingresos por producto:**
+
+| Producto | Unidades | Ingresos (COP) |
 |---|---:|---:|
-| 1 | 84000 | 84000 |
-| 2 | 26000 | 110000 |
-| 3 | 95000 | 205000 |
-| 4 | 42000 | 247000 |
-| 5 | 135000 | 382000 |
-| 6 | 52000 | 434000 |
-| 7 | 120000 | 554000 |
-| 8 | 0 | 554000 |
-| 9 | 90000 | 644000 |
-| 10 | 168000 | 812000 |
-| 11 | 95000 | 907000 |
-| 12 | 78000 | 985000 |
+| Origen Huila 500 g | 7 | 294.000 |
+| Origen Nariño 250 g | 6 | 156.000 |
+| Prensa francesa | 2 | 190.000 |
+| Origen Sierra 500 g | 5 | 225.000 |
+| Molino manual | 1 | 120.000 |
+| **Total** | **21** | **985.000** |
 
-Resultado: **985000 COP**.
+**Top 3 esperado de `topProductosPorValor(ventas, 3)`:**
 
-#### Traza 2: ventaMayor()
+1. Origen Huila 500 g — 294.000 COP.
+2. Origen Sierra 500 g — 225.000 COP.
+3. Prensa francesa — 190.000 COP.
 
-| ID | Valor actual | Mayor encontrado |
-|---|---:|---|
-| 1 | 84000 | ID 1 |
-| 2 | 26000 | ID 1 |
-| 3 | 95000 | ID 3 |
-| 4 | 42000 | ID 3 |
-| 5 | 135000 | ID 5 |
-| 6 | 52000 | ID 5 |
-| 7 | 120000 | ID 5 |
-| 8 | 0 | ID 5 |
-| 9 | 90000 | ID 5 |
-| 10 | 168000 | ID 10 |
-| 11 | 95000 | ID 10 |
-| 12 | 78000 | ID 10 |
+**Inmutabilidad:** `Object.entries()` y `map()` crean arreglos nuevos. La implementación mostrada de `topProductosPorValor` ordena el arreglo nuevo, no el arreglo de ventas. Falta registrar la prueba explícita que verifica que el orden original de `ventas` no cambió.
 
-Resultado: **venta ID 10, con un valor de 168000 COP**.
+### Pruebas de equivalencia: `node src/verificar.js`
 
-### 3. Decisiones sobre casos borde
+Salida compartida de la ejecución:
 
-- Las ventas con cantidad igual a 0 no se consideran ventas efectivas.
-- Un arreglo vacío devuelve 0 en los indicadores numéricos.
-- `ventaMayor([])` devuelve `null`.
-- El ticket promedio devuelve 0 si no existen ventas válidas.
-- Las ciudades se comparan sin distinguir mayúsculas ni espacios al comienzo o final.
-- Si dos ventas tienen el mismo valor máximo, se conserva la primera encontrada.
+```text
+Total Vendido: OK
+Unidades Vendidas: OK
+Ventas por Ciudad (Medellín): OK
 
-### 4. Pruebas
+--- Arreglo vacío ---
+Total Vendido (vacío): OK
+Unidades Vendidas (vacío): OK
+Ventas por Ciudad Medellín (vacío): OK
+```
 
-Se ejecutó `node src/analitica.js` para verificar los indicadores.
+Las tres parejas de funciones coinciden con el arreglo completo y con el arreglo vacío. **Nota:** `OK` confirma equivalencia entre implementaciones, pero por sí solo no comprueba que ambas den un valor esperado; para ello se contrastaron los resultados con las trazas y valores de la muestra.
 
-Resultados con la muestra completa:
+### Casos borde y pruebas 
 
-- Total vendido: 985000 COP.
-- Unidades vendidas: 21.
-- Venta mayor: ID 10.
-- Ticket promedio: 89545.45454545454 COP.
-- Ventas en Medellín: 356000 COP.
-- Ventas en Bogotá: 276000 COP.
+- `totalPorCiudad([])` y `unidadesPorProducto([])` deben devolver `{}`.
+- `topProductosPorValor([], 3)` y `topProductosPorValor(ventas, 0)` deben devolver `[]`.
+- `topProductosPorValor(ventas, 3)` debe devolver exactamente tres objetos, en orden descendente.
+- Conviene comprobar que la lista `ventas` mantiene sus IDs en el mismo orden después de calcular el ranking.
+- `sort()` modifica el arreglo sobre el que opera; aquí ordenamos un arreglo nuevo. Una copia con `[...arreglo]` sería necesaria si se ordenara un arreglo que se necesita preservar.
+- En las claves de productos, `producto in acumulador` funciona con la muestra, pero `Object.hasOwn(acumulador, producto)` es una opción más estricta para evitar propiedades heredadas.
 
-Los resultados coinciden con los cálculos manuales.
+### Pruebas adicionales y casos borde
+
+Se ejecutó `node src/verificar.js` para comprobar la equivalencia entre algoritmos con ciclos y métodos de arreglo, así como el comportamiento de las funciones ante entradas especiales.
+
+**Resultados obtenidos:**
+
+| Prueba | Resultado | Estado |
+|---|---|---|
+| Total vendido: ciclo vs. método | OK | Correcto |
+| Unidades vendidas: ciclo vs. método | OK | Correcto |
+| Ventas por Medellín: ciclo vs. método | OK | Correcto |
+| Tres comparaciones con arreglo vacío | OK | Correcto |
+| Ranking con arreglo vacío | `[]` | Correcto |
+| Ranking con k = 0 | `[]` | Correcto |
+| Ranking con k = 3 | Tres productos | Correcto |
+| Agrupación de ciudades vacía | `{}` | Correcto |
+| Agrupación de productos vacía | `{}` | Correcto |
+| Agrupación de una venta | Origen Huila: 2 unidades | Correcto |
+| Conservación del orden original | OK | Correcto |
+
+**Conclusión:** las versiones con ciclos y métodos producen los mismos resultados en los escenarios comprobados. Los rankings y agrupaciones manejan correctamente los casos borde evaluados, y la ejecución del ranking conserva el orden original de los registros de ventas.
+
+**Decisión:** mantener el arreglo original sin ordenar directamente y trabajar con arreglos derivados para generar los rankings.
 
 
+---
 
+## MiniReto 4 — Reporte de negocio v0.1 (pendiente)
+
+Este reto todavía no se ha desarrollado ni probado en la conversación. Al completarlo, registrar aquí:
+
+- Ejecución de `node src/reporte.js` y sus cuatro secciones: resumen general, ventas por ciudad, unidades por producto y top 3 por valor.
+- Formato de importes COP mediante `toLocaleString("es-CO")`.
+- `ventasDelDia(ventas, fecha)` y resultados de un día con ventas y otro sin ventas.
+- Depuración del posible grupo duplicado `Bogotá` / `Bogotá ` usando: **síntoma, entrada, hipótesis, prueba, causa, corrección**.
+- Depuración del posible `NaN` en un día sin ventas, con los mismos seis campos.
+- Verificación de que el reporte no presenta `NaN`, `undefined` ni grupos duplicados.
+- Actualización de `README.md` y commit/push de la versión v0.1.

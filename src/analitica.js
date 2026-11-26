@@ -131,91 +131,53 @@ function totalPorCiudad(ventas) {
         return acumulador;
     }, {});
 }
+
+// Responde a Cuantas unidades vendimos de cada producto?
 function unidadesPorProducto (ventas){
     return ventas.reduce((acumulador,venta) => {
         if (venta.cantidad>0){
-            acumulador += venta.cantidad
-            producto += venta.producto
+            const producto = venta.producto;
+            if(!(producto in acumulador)){
+                acumulador [producto] = 0;
+            }
+            acumulador[producto] += venta.cantidad;
         }
 
 
-        return acumulador, producto;
+        return acumulador;
     }, {})
 }
 
 
-console.log(unidadesPorProducto(ventas));
+function valorPorProducto(ventas){
+    return ventas.reduce((acumulador,venta) => {
+        if(venta.cantidad > 0) {
+            const producto = venta.producto;
+            if(!(producto in acumulador)) {
+                acumulador[producto] = 0;
+            }
+            acumulador[producto] += valorVenta(venta);
+            
+        }
 
-console.log(unidadesPorProducto([]));
+        return acumulador
+    },{})
+}
 
 
+// Responde a Que productos generaron mas dinero?
+function topProductosPorValor(ventas, k) {
+    const totales = valorPorProducto(ventas)
 
-// function totalVendidoInstrumentada(ventas,contador) {
-//     let total = 0,
-//     for (const v of ventas) {
-//         contador.ops++;
-//         total += valorVenta(v)
-//     }
-//     return total;
-// }
-
-// function ventaMayorInstrumentada(ventas,contador) {
-//     if(ventas.length===0){
-
-//     }
-//     let total = 0,
-//     for (const v of ventas) {
-//         contador.ops++;
-//         total += valorVenta(v)
-//     }
-//     return total;
-// }
-
-// console.log(totalPorCiudad(ventas));
-// console.log(totalPorCiudad([]));
-
-// console.log(
-//     "Medellín con ciclo:",
-//     ventasPorCiudad(ventas, "Medellín")
-// );
-
-// console.log(
-//     "Medellín con métodos:",
-//     ventasPorCiudadM(ventas, "Medellín")
-// );
-
-// console.log(
-//     "¿Son iguales?",
-//     ventasPorCiudad(ventas, "Medellín") ===
-//     ventasPorCiudadM(ventas, "Medellín")
-// );
-
-// console.log("Con ciclo:", unidadesVendidas(ventas));
-// console.log("Con métodos:", unidadesVendidasM(ventas));
-
-// console.log(
-//     "¿Son iguales?",
-//     unidadesVendidas(ventas) === unidadesVendidasM(ventas)
-// );
-
-// console.log("Con ciclo:", totalVendido(ventas));
-// console.log("Con métodos:", totalVendidoM(ventas));
-// console.log(
-//     "¿Son iguales?",
-//     totalVendido(ventas) === totalVendidoM(ventas)
-// );
+    return Object.entries(totales)
+        .map(([producto,valor]) => ({producto,valor}))
+        .sort((a,b) => b.valor - a.valor)
+        .slice(0,k)
+    
+}
 
 
 
-// for (const [nombre, datos] of pruebas) {
-//     console.log(`\n${nombre}`);
-
-//     console.log("Total:", totalVendido(datos));
-//     console.log("Unidades:", unidadesVendidas(datos));
-//     console.log("Mayor:", ventaMayor(datos));
-//     console.log("Ticket:", ticketPromedio(datos));
-//     console.log("Medellín:", ventasPorCiudad(datos, "Medellín"));
-// }
 
 
 module.exports = {
@@ -229,10 +191,8 @@ module.exports = {
     unidadesVendidasM,
     ventasPorCiudadM,
     totalPorCiudad,
-    totalVendidoInstrumentada,
-    ventaMayorInstrumentada,
+    unidadesPorProducto,
+    valorPorProducto,
+    topProductosPorValor
 };
-
-
-
 
