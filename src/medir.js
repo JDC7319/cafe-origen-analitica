@@ -1,10 +1,11 @@
-const analitica = require("/analitica.js")
-const {generarVentas} = [];
+const analitica = require("./analitica.js")
+const {generarVentas} = require("./datos.js")
 
 const muestra = [100,1000,10000,100000]
 const resultados = [];
 
 for(const n of muestra){
+    
     const lote = generarVentas(n);
     const c1={ops:0};
     const c2={ops:0};
@@ -15,9 +16,12 @@ for(const n of muestra){
     analitica.totalPorCiudadInstrumentada(lote,c3);
     analitica.primeraVentaInstrumentada(lote,c4);
 
-    resultados.push({
+    resultados.push( {
         tamLote:n,
-        totalVendido:c1.ops,
+        totalV:c1.ops,
         ventaMayor:c2.ops,
+        totalCiudad:c3.ops,
+        primeraVenta:c4.ops
     })
 }
+

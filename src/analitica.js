@@ -182,7 +182,7 @@ function ventasDelDia(ventas, fecha) {
     });
 }
 
-
+const  totalVendido  = 0
 
 
 
